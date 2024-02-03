@@ -1,6 +1,6 @@
 // Sample data (replace with data from your database)
-const groupsData = [
-    { id: 1, members: ["Student1", "Student2", "Student3"] },
+let groupsData = [
+    { id: 1, status: "Available", members: ["", "", ""] },
     // ... other groups
 ];
 
@@ -15,17 +15,21 @@ function renderGroups(groups) {
         groupCard.className = 'group-card';
 
         const membersList = document.createElement('ul');
-        group.members.forEach(member => {
+        group.members.forEach((member, index) => {
             const listItem = document.createElement('li');
-            listItem.textContent = member;
+            listItem.textContent = member || "Available";
             membersList.appendChild(listItem);
+            
+            if (!member) {
+                listItem.addEventListener('click', () => selectMember(group.id, index));
+            }
         });
 
         groupCard.innerHTML = `
             <h3>Group ${group.id}</h3>
+            <strong>Status:</strong> ${group.status}<br>
             <strong>Members:</strong>
             ${membersList.outerHTML}
-            <button onclick="joinGroup(${group.id})">Join Group</button>
         `;
 
         groupList.appendChild(groupCard);
@@ -34,9 +38,21 @@ function renderGroups(groups) {
     appContainer.appendChild(groupList);
 }
 
-// Function to simulate joining a group (replace with actual backend logic)
-function joinGroup(groupId) {
-    alert(`You have joined Group ${groupId}`);
+// Function to handle member selection
+function selectMember(groupId, index) {
+    const memberName = prompt("Enter your name or student ID:");
+    if (memberName) {
+        groupsData = groupsData.map(group => {
+            if (group.id === groupId && group.members[index] === "") {
+                group.members[index] = memberName;
+                const isFull = group.members.every(member => member !== "");
+                group.status = isFull ? "Full" : "Available";
+            }
+            return group;
+        });
+
+        renderGroups(groupsData);
+    }
 }
 
 // Render groups when the page loads
